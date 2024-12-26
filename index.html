@@ -82,15 +82,20 @@
         jawaban: answers
       };
 
-      fetch("https://script.google.com/macros/s/AKfycbxhfXga29OwECk5f_R2Oj1U7K5j2StjA9BO528Y36C7vfo4MayV-zrnZaJtPhu3Jn1hmg/exec", { // Ganti YOUR_WEB_APP_URL dengan URL dari Google Apps Script
+      fetch("YOUR_WEB_APP_URL", { // Ganti YOUR_WEB_APP_URL dengan URL dari Google Apps Script
         method: "POST",
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
         },
       })
-      .then(response => response.text())
-      .then(result => console.log(result))
+      .then(response => {
+        if (response.ok) {
+          alert("Jawaban berhasil terkirim ke Google Sheets!");
+        } else {
+          alert("Gagal mengirim jawaban. Periksa kembali URL Apps Script Anda.");
+        }
+      })
       .catch(error => console.error("Error:", error));
     }
   </script>
