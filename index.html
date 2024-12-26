@@ -1,123 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Kraepelin Test</title>
-  <script>
-    let answers = [];
-    let currentQuestion = 0;
-    let currentSet = 0;
-    const sets = [
-      ["Soal 1", "Soal 2", "Soal 3", "Soal 4", "Soal 5", "Soal 6", "Soal 7", "Soal 8", "Soal 9", "Soal 10", "Soal 11", "Soal 12", "Soal 13", "Soal 14", "Soal 15", "Soal 16", "Soal 17", "Soal 18", "Soal 19", "Soal 20", "Soal 21", "Soal 22", "Soal 23", "Soal 24", "Soal 25", "Soal 26", "Soal 27"],
-      ["Soal 28", "Soal 29", "Soal 30", "Soal 31", "Soal 32", "Soal 33", "Soal 34", "Soal 35", "Soal 36", "Soal 37", "Soal 38", "Soal 39", "Soal 40", "Soal 41", "Soal 42", "Soal 43", "Soal 44"]
-    ];
-    let timer;
-
-    function startTest() {
-      document.getElementById("intro").style.display = "none";
-      document.getElementById("test").style.display = "block";
-      startSet();
-    }
-
-    function startSet() {
-      currentQuestion = 0;
-      showQuestion();
-      startTimer();
-    }
-
-    function startTimer() {
-      let timeLeft = 30; // 30 seconds per set
-      document.getElementById("timer").innerText = `Waktu Tersisa: ${timeLeft} detik`;
-      timer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").innerText = `Waktu Tersisa: ${timeLeft} detik`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          moveToNextSet();
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Kraepelin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
         }
-      }, 1000);
-    }
-
-    function showQuestion() {
-      if (currentQuestion < sets[currentSet].length) {
-        document.getElementById("question").innerText = sets[currentSet][currentQuestion];
-      } else {
-        clearInterval(timer);
-        moveToNextSet();
-      }
-    }
-
-    function submitAnswer() {
-      const answer = document.getElementById("answer").value;
-      answers.push(answer || ""); // Save answer or empty if skipped
-      document.getElementById("answer").value = ""; // Clear input
-      currentQuestion++;
-      if (currentQuestion < sets[currentSet].length) {
-        showQuestion();
-      } else {
-        clearInterval(timer);
-        moveToNextSet();
-      }
-    }
-
-    function moveToNextSet() {
-      currentSet++;
-      if (currentSet < sets.length) {
-        startSet();
-      } else {
-        endTest();
-      }
-    }
-
-    function endTest() {
-      document.getElementById("test").style.display = "none";
-      document.getElementById("thankyou").style.display = "block";
-      sendToGoogleSheets();
-    }
-
-    function sendToGoogleSheets() {
-      const data = {
-        nama: document.getElementById("nama").value,
-        tahunLahir: document.getElementById("tahunLahir").value,
-        pendidikan: document.getElementById("pendidikan").value,
-        jawaban: answers
-      };
-
-      fetch("https://script.google.com/macros/s/AKfycbxhfXga29OwECk5f_R2Oj1U7K5j2StjA9BO528Y36C7vfo4MayV-zrnZaJtPhu3Jn1hmg/exec", { // Ganti YOUR_WEB_APP_URL dengan URL dari Google Apps Script
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then(response => {
-        if (response.ok) {
-          alert("Jawaban berhasil terkirim ke Google Sheets!");
-        } else {
-          alert("Gagal mengirim jawaban. Periksa kembali URL Apps Script Anda.");
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
         }
-      })
-      .catch(error => console.error("Error:", error));
-    }
-  </script>
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <div id="intro">
-    <h1>Kraepelin Test</h1>
-    <label>Nama: <input type="text" id="nama"></label><br>
-    <label>Tahun Lahir: <input type="number" id="tahunLahir"></label><br>
-    <label>Pendidikan: <input type="text" id="pendidikan"></label><br>
-    <button onclick="startTest()">Mulai Tes</button>
-  </div>
 
-  <div id="test" style="display:none;">
-    <p id="timer">Waktu Tersisa: 30 detik</p>
-    <p id="question"></p>
-    <input type="text" id="answer" onkeypress="if(event.key === 'Enter') submitAnswer()">
-    <button onclick="submitAnswer()">Next</button>
-  </div>
+    <div class="form-container">
+        <h1>Test Kraepelin</h1>
+        <form id="userInfoForm">
+            <!-- Nama -->
+            <label for="nama">Nama Lengkap</label>
+            <input type="text" id="nama" name="nama" placeholder="Masukkan nama lengkap" required>
 
-  <div id="thankyou" style="display:none;">
-    <h2>Terima kasih telah mengikuti tes!</h2>
-  </div>
+            <!-- Tahun Lahir -->
+            <label for="tahunLahir">Tahun Lahir</label>
+            <input type="number" id="tahunLahir" name="tahunLahir" placeholder="Masukkan tahun lahir" required>
+
+            <!-- Pendidikan Terakhir -->
+            <label for="pendidikan">Pendidikan Terakhir</label>
+            <select id="pendidikan" name="pendidikan" required>
+                <option value="">Pilih Pendidikan</option>
+                <option value="SMA">SMA/SMK</option>
+                <option value="D3">Diploma 3</option>
+                <option value="S1">S1</option>
+                <option value="S2">S2</option>
+                <option value="S3">S3</option>
+            </select>
+
+            <!-- Tombol Mulai -->
+            <button type="submit">Mulai Tes</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('userInfoForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Menghindari pengiriman form secara default
+
+            // Ambil data dari form
+            var nama = document.getElementById('nama').value;
+            var tahunLahir = document.getElementById('tahunLahir').value;
+            var pendidikan = document.getElementById('pendidikan').value;
+
+            // Simpan data ke Google Sheets (gunakan URL Web App di sini)
+            var data = {
+                nama: nama,
+                tahunLahir: tahunLahir,
+                pendidikan: pendidikan
+            };
+
+            // Kirim data ke Google Apps Script menggunakan fetch
+            fetch("https://script.google.com/macros/s/AKfycb.../exec", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Data berhasil disimpan!");
+                // Setelah data terkirim, lanjutkan ke soal Kraepelin
+                window.location.href = "soal_kraepelin.html"; // Redirect ke halaman soal
+            })
+            .catch(error => {
+                console.error("Terjadi kesalahan:", error);
+                alert("Gagal mengirim data. Silakan coba lagi.");
+            });
+        });
+    </script>
 </body>
 </html>
