@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kraepelin Test</title>
+  <script>
+    let currentQuestion = 0;
+    let currentSet = 0;
+    const answers = new Array(44).fill(""); // Store answers
+    const setLength = 27; // Number of questions per set
+    const totalQuestions = 44; // Total questions
+    const setDuration = 30; // 30 seconds for each set
+    const formData = { name: "", birthYear: "", education: "", answers: [] };
+    let timerInterval;
+
+    function startTest() {
+      // Capture testee details
+      formData.name = document.getElementById("name").value;
+      formData.birthYear = document.getElementById("birthYear").value;
+      formData.education = document.getElementById("education").value;
+
+      // Validation
+      if (!formData.name || !formData.birthYear || !formData.education) {
+        alert("Harap isi semua data sebelum memulai tes!");
+        return;
+      }
+
+      // Hide intro form and show test
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("test").style.display = "block";
+      startTimer();
+      showQuestion();
+    }
+
+    function startTimer() {
+      let timeLeft = setDuration;
+
+      // Update timer every second
+      timerInterval = setInterval(() => {
+        document.getElementById("timer").innerText = `Waktu tersisa: ${timeLeft}s`;
+        timeLeft--;
+
+        // When time is up, move to the next set or finish the test
+        if (timeLeft < 0) {
+          clearInterval(timerInterval);
+          nextSet();
+        }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      // If still within the current set
+      if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
+        document.getElementById("question").innerText = `Soal ${currentQuestion + 1}`;
+        document.getElementById("answer").value = answers[currentQuestion];
+        document.getElementById("answer").focus();
+      } else if (currentQuestion >= totalQuestions) {
+        submitAnswers();
+      }
+    }
+
+    function nextQuestion() {
+      answers[currentQuestion] = document.getElementById("answer").value; // Save answer
+      currentQuestion++;
+      if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
+        showQuestion();
+      }
+    }
+
+    function nextSet() {
+      // Save answers for the current set
+      answers[currentQuestion] = document.getElementById("answer").value;
+      currentSet++;
+
+      // If still within total sets, move to next set
+      if (currentSet * setLength < totalQuestions) {
+        currentQuestion = currentSet * setLength;
+        startTimer(); // Restart timer for the next set
+        showQuestion();
+      } else {
+        submitAnswers(); // If all sets are completed
+      }
+    }
+
+    function submitAnswers() {
+      formData.answers = answers;
+
+      fetch("https://script.google.com/macros/s/AKfycbwuEGVHbM7gCKeiIs3PLNek4i4EKqMGe5UvxDOks5SUpqZhxI_jbsl_VDldQVD_mIZbsw/exec", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.text())
+        .then((data) => {
+          alert("Hasil Anda telah disimpan. Terima kasih!");
+          location.reload(); // Restart the test
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+  </script>
+</head>
+<body>
+  <!-- Step 1: Collect personal information -->
+  <div id="intro">
+    <h2>Masukkan Data Diri Anda</h2>
+    <label for="name">Nama Panjang:</label><br>
+    <input type="text" id="name" required><br><br>
+
+    <label for="birthYear">Tahun Lahir:</label><br>
+    <input type="number" id="birthYear" min="1900" max="2024" required><br><br>
+
+    <label for="education">Pendidikan Terakhir:</label><br>
+    <select id="education" required>
+      <option value="">--Pilih Pendidikan--</option>
+      <option value="SD">SD</option>
+      <option value="SMP">SMP</option>
+      <option value="SMA">SMA</option>
+      <option value="Diploma">Diploma</option>
+      <option value="Sarjana">Sarjana</option>
+      <option value="Magister">Magister</option>
+      <option value="Doktor">Doktor</option>
+    </select><br><br>
+
+    <button onclick="startTest()">Mulai Tes</button>
+  </div>
+
+  <!-- Step 2: Test interface -->
+  <div id="test" style="display:none;">
+    <h3 id="question"></h3>
+    <input type="text" id="answer" onkeypress="if(event.key === 'Enter') nextQuestion()" />
+    <p id="timer"></p>
+  </div>
+</body>
+</html>
