@@ -1,145 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kraepelin Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+  <title>Kraepelin Test</title>
+  <script>
+    let currentQuestion = 0;
+    let currentSet = 0;
+    const answers = new Array(44).fill(""); // Store answers
+    const setLength = 27; // Number of questions per set
+    const totalQuestions = 44; // Total questions
+    const setDuration = 30; // 30 seconds for each set
+    const formData = { name: "", birthYear: "", education: "", answers: [] };
+    let timerInterval;
+
+    function startTest() {
+      // Capture testee details
+      formData.name = document.getElementById("name").value;
+      formData.birthYear = document.getElementById("birthYear").value;
+      formData.education = document.getElementById("education").value;
+
+      // Validation
+      if (!formData.name || !formData.birthYear || !formData.education) {
+        alert("Harap isi semua data sebelum memulai tes!");
+        return;
+      }
+
+      // Hide intro form and show test
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("test").style.display = "block";
+      startTimer();
+      showQuestion();
+    }
+
+    function startTimer() {
+      let timeLeft = setDuration;
+
+      // Update timer every second
+      timerInterval = setInterval(() => {
+        document.getElementById("timer").innerText = `Waktu tersisa: ${timeLeft}s`;
+        timeLeft--;
+
+        // When time is up, move to the next set or finish the test
+        if (timeLeft < 0) {
+          clearInterval(timerInterval);
+          nextSet();
         }
-        .question {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        .timer {
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-        .submit-btn {
-            margin-top: 20px;
-        }
-    </style>
+      }, 1000);
+    }
+
+    function showQuestion() {
+      // If still within the current set
+      if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
+        document.getElementById("question").innerText = `Soal ${currentQuestion + 1}`;
+        document.getElementById("answer").value = answers[currentQuestion];
+        document.getElementById("answer").focus();
+      } else if (currentQuestion >= totalQuestions) {
+        submitAnswers();
+      }
+    }
+
+    function nextQuestion() {
+      answers[currentQuestion] = document.getElementById("answer").value; // Save answer
+      currentQuestion++;
+      if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
+        showQuestion();
+      }
+    }
+
+    function nextSet() {
+      // Save answers for the current set
+      answers[currentQuestion] = document.getElementById("answer").value;
+      currentSet++;
+
+      // If still within total sets, move to next set
+      if (currentSet * setLength < totalQuestions) {
+        currentQuestion = currentSet * setLength;
+        startTimer(); // Restart timer for the next set
+        showQuestion();
+      } else {
+        submitAnswers(); // If all sets are completed
+      }
+    }
+
+    function submitAnswers() {
+      formData.answers = answers;
+
+      fetch("https://script.google.com/macros/s/AKfycbwuEGVHbM7gCKeiIs3PLNek4i4EKqMGe5UvxDOks5SUpqZhxI_jbsl_VDldQVD_mIZbsw/exec", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.text())
+        .then((data) => {
+          alert("Hasil Anda telah disimpan. Terima kasih!");
+          location.reload(); // Restart the test
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+  </script>
 </head>
 <body>
-    <h1>Kraepelin Test</h1>
-    <form id="kraepelinTestForm">
-        <label for="name">Nama:</label><br>
-        <input type="text" id="name" required><br><br>
+  <!-- Step 1: Collect personal information -->
+  <div id="intro">
+    <h2>Masukkan Data Diri Anda</h2>
+    <label for="name">Nama Panjang:</label><br>
+    <input type="text" id="name" required><br><br>
 
-        <label for="birthyear">Tahun Lahir:</label><br>
-        <input type="number" id="birthyear" required><br><br>
+    <label for="birthYear">Tahun Lahir:</label><br>
+    <input type="number" id="birthYear" min="1900" max="2024" required><br><br>
 
-        <label for="education">Pendidikan Terakhir:</label><br>
-        <select id="education">
-            <option value="SMA">SMA</option>
-            <option value="D3">D3</option>
-            <option value="S1">S1</option>
-            <option value="S2">S2</option>
-            <option value="S3">S3</option>
-        </select><br><br>
+    <label for="education">Pendidikan Terakhir:</label><br>
+    <select id="education" required>
+      <option value="">--Pilih Pendidikan--</option>
+      <option value="SD">SD</option>
+      <option value="SMP">SMP</option>
+      <option value="SMA">SMA</option>
+      <option value="Diploma">Diploma</option>
+      <option value="Sarjana">Sarjana</option>
+      <option value="Magister">Magister</option>
+      <option value="Doktor">Doktor</option>
+    </select><br><br>
 
-        <div id="questions">
-            <!-- Questions will be injected here -->
-        </div>
+    <button onclick="startTest()">Mulai Tes</button>
+  </div>
 
-        <div id="timer" class="timer">
-            Waktu: <span id="timeRemaining">30</span> detik
-        </div>
-
-        <button class="submit-btn" type="submit">Submit</button>
-    </form>
-
-    <script>
-        const questions = [
-            "Soal 1", "Soal 2", "Soal 3", "Soal 4", "Soal 5", "Soal 6", "Soal 7", "Soal 8", "Soal 9", "Soal 10",
-            "Soal 11", "Soal 12", "Soal 13", "Soal 14", "Soal 15", "Soal 16", "Soal 17", "Soal 18", "Soal 19", "Soal 20",
-            "Soal 21", "Soal 22", "Soal 23", "Soal 24", "Soal 25", "Soal 26", "Soal 27"
-        ];
-
-        let currentQuestionIndex = 0;
-        let timer;
-
-        function displayQuestion() {
-            const questionContainer = document.getElementById('questions');
-            questionContainer.innerHTML = `
-                <div class="question">
-                    ${questions[currentQuestionIndex]}
-                </div>
-                <input type="text" id="answer" autofocus>
-            `;
-        }
-
-        function startTimer() {
-            let timeRemaining = 30;
-            document.getElementById('timeRemaining').textContent = timeRemaining;
-
-            timer = setInterval(function() {
-                timeRemaining--;
-                document.getElementById('timeRemaining').textContent = timeRemaining;
-
-                if (timeRemaining <= 0) {
-                    clearInterval(timer);
-                    moveToNextQuestion();
-                }
-            }, 1000);
-        }
-
-        function moveToNextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                displayQuestion();
-                startTimer();
-            } else {
-                alert("Tes selesai!");
-                saveResults();
-            }
-        }
-
-        function saveResults() {
-            const name = document.getElementById('name').value;
-            const birthyear = document.getElementById('birthyear').value;
-            const education = document.getElementById('education').value;
-            const answers = [];
-
-            const answerElements = document.querySelectorAll('input[type="text"]');
-            answerElements.forEach((input) => {
-                answers.push(input.value);
-            });
-
-            const data = {
-                name: name,
-                birthyear: birthyear,
-                education: education,
-                answers: answers
-            };
-
-            fetch("https://script.google.com/macros/s/AKfycbxruV3FTAh2l9W-ID5Krsgn-cbPAx8K13HI4gPARJtAvdGhlGTQveVonk2eAMTkbO0AUA/exec", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => alert("Hasil telah terkirim!"))
-            .catch(error => alert("Terjadi kesalahan saat mengirim hasil."));
-        }
-
-        document.getElementById('kraepelinTestForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            saveResults();
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                moveToNextQuestion();
-            }
-        });
-
-        displayQuestion();
-        startTimer();
-    </script>
+  <!-- Step 2: Test interface -->
+  <div id="test" style="display:none;">
+    <h3 id="question"></h3>
+    <input type="text" id="answer" onkeypress="if(event.key === 'Enter') nextQuestion()" />
+    <p id="timer"></p>
+  </div>
 </body>
 </html>
