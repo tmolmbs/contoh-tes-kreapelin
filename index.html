@@ -3,7 +3,7 @@
 <head>
   <title>Kraepelin Test</title>
   <style>
-    /* Reset CSS to avoid GitHub Pages styling issues */
+    /* Reset CSS */
     * {
       margin: 0;
       padding: 0;
@@ -78,6 +78,17 @@
     const formData = { name: "", birthYear: "", education: "", answers: [] };
     let timerInterval;
 
+    // Array berisi soal
+    const questions = [
+      "5 + 3 = ?", "9 - 4 = ?", "6 x 2 = ?", "8 / 2 = ?", "7 + 6 = ?", "15 - 9 = ?", "9 x 3 = ?", 
+      "12 / 4 = ?", "14 + 5 = ?", "20 - 7 = ?", "10 x 2 = ?", "18 / 3 = ?", "25 + 9 = ?", 
+      "35 - 14 = ?", "50 / 5 = ?", "60 x 2 = ?", "13 + 8 = ?", "27 - 10 = ?", "15 x 4 = ?", 
+      "30 / 6 = ?", "70 + 20 = ?", "100 - 30 = ?", "12 x 12 = ?", "144 / 12 = ?", "9 + 11 = ?", 
+      "33 - 15 = ?", "45 x 1 = ?", "80 / 8 = ?", "100 + 1 = ?", "2 x 50 = ?", "6 + 7 = ?", 
+      "17 - 8 = ?", "24 / 8 = ?", "12 + 19 = ?", "50 - 21 = ?", "11 x 2 = ?", "60 / 10 = ?", 
+      "42 + 8 = ?", "55 - 25 = ?", "15 x 2 = ?", "90 / 9 = ?", "12 + 24 = ?", "48 - 12 = ?"
+    ];
+
     function startTest() {
       // Capture testee details
       formData.name = document.getElementById("name").value;
@@ -116,7 +127,7 @@
     function showQuestion() {
       // If still within the current set
       if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
-        document.getElementById("question").innerText = `Soal ${currentQuestion + 1}`;
+        document.getElementById("question").innerText = questions[currentQuestion]; // Ambil soal dari array
         document.getElementById("answer").value = answers[currentQuestion];
         document.getElementById("answer").focus();
       } else if (currentQuestion >= totalQuestions) {
