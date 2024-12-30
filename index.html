@@ -71,22 +71,21 @@
   <script>
     let currentQuestion = 0;
     let currentSet = 0;
-    const answers = new Array(44).fill(""); // Store answers
+    const answers = [];
     const setLength = 27; // Number of questions per set
-    const totalQuestions = 44; // Total questions
+    const totalQuestions = 54; // Total questions
     const setDuration = 30; // 30 seconds for each set
     const formData = { name: "", birthYear: "", education: "", answers: [] };
     let timerInterval;
 
     // Array berisi soal
     const questions = [
-      "5 + 3 = ?", "9 - 4 = ?", "6 x 2 = ?", "8 / 2 = ?", "7 + 6 = ?", "15 - 9 = ?", "9 x 3 = ?", 
-      "12 / 4 = ?", "14 + 5 = ?", "20 - 7 = ?", "10 x 2 = ?", "18 / 3 = ?", "25 + 9 = ?", 
-      "35 - 14 = ?", "50 / 5 = ?", "60 x 2 = ?", "13 + 8 = ?", "27 - 10 = ?", "15 x 4 = ?", 
-      "30 / 6 = ?", "70 + 20 = ?", "100 - 30 = ?", "12 x 12 = ?", "144 / 12 = ?", "9 + 11 = ?", 
-      "33 - 15 = ?", "45 x 1 = ?", "80 / 8 = ?", "100 + 1 = ?", "2 x 50 = ?", "6 + 7 = ?", 
-      "17 - 8 = ?", "24 / 8 = ?", "12 + 19 = ?", "50 - 21 = ?", "11 x 2 = ?", "60 / 10 = ?", 
-      "42 + 8 = ?", "55 - 25 = ?", "15 x 2 = ?", "90 / 9 = ?", "12 + 24 = ?", "48 - 12 = ?"
+      "4 + 9", "9 + 2", "2 + 7", "7 + 4", "4 + 6", "6 + 6", "6 + 9", "9 + 2", "2 + 9", "9 + 5", 
+      "5 + 6", "6 + 2", "2 + 2", "2 + 8", "8 + 1", "1 + 1", "1 + 2", "2 + 2", "2 + 9", "9 + 6", 
+      "6 + 6", "6 + 4", "4 + 7", "7 + 9", "9 + 7", "7 + 7", "7 + 2",
+      "3 + 8", "8 + 1", "1 + 6", "6 + 1", "1 + 7", "7 + 5", "5 + 8", "8 + 6", "6 + 2", "2 + 4", 
+      "4 + 6", "6 + 5", "5 + 9", "9 + 2", "2 + 5", "5 + 3", "3 + 6", "6 + 3", "3 + 5", "5 + 9", 
+      "9 + 1", "1 + 7", "7 + 6", "6 + 9", "9 + 6", "6 + 5", "5 + 7"
     ];
 
     function startTest() {
@@ -95,13 +94,11 @@
       formData.birthYear = document.getElementById("birthYear").value;
       formData.education = document.getElementById("education").value;
 
-      // Validation
       if (!formData.name || !formData.birthYear || !formData.education) {
         alert("Harap isi semua data sebelum memulai tes!");
         return;
       }
 
-      // Hide intro form and show test
       document.getElementById("intro").style.display = "none";
       document.getElementById("test").style.display = "block";
       startTimer();
@@ -109,110 +106,96 @@
     }
 
     function startTimer() {
-      let timeLeft = setDuration;
+  let timeLeft = setDuration;
 
-      // Update timer every second
-      timerInterval = setInterval(() => {
-        document.getElementById("timer").innerText = `Waktu tersisa: ${timeLeft}s`;
-        timeLeft--;
+  timerInterval = setInterval(() => {
+    document.getElementById("timer").innerText = `Waktu tersisa: ${timeLeft}s`;
+    timeLeft--;
 
-        // When time is up, move to the next set or finish the test
-        if (timeLeft < 0) {
-          clearInterval(timerInterval);
-          nextSet();
-        }
-      }, 1000);
+    if (timeLeft < 0) {
+      clearInterval(timerInterval);
+      nextSet();
     }
+  }, 1000);
+}
 
-    function showQuestion() {
-      // If still within the current set
-      if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
-        document.getElementById("question").innerText = questions[currentQuestion]; // Ambil soal dari array
-        document.getElementById("answer").value = answers[currentQuestion];
-        document.getElementById("answer").focus();
-      } else if (currentQuestion >= totalQuestions) {
-        downloadCSV();
-      }
-    }
+function showQuestion() {
+  if (currentQuestion < totalQuestions) {
+    document.getElementById("question").innerText = questions[currentQuestion];
+    document.getElementById("answer").value = answers[currentQuestion] || "";
+    document.getElementById("answer").focus();
+  } else {
+    downloadCSV();
+  }
+}
 
-    function nextQuestion() {
-      answers[currentQuestion] = document.getElementById("answer").value; // Save answer
-      currentQuestion++;
-      if (currentQuestion < (currentSet + 1) * setLength && currentQuestion < totalQuestions) {
-        showQuestion();
-      }
-    }
+function nextQuestion() {
+  answers[currentQuestion] = document.getElementById("answer").value;
+  currentQuestion++;
 
-    function nextSet() {
-      // Save answers for the current set
-      answers[currentQuestion] = document.getElementById("answer").value;
-      currentSet++;
+  if (currentQuestion % setLength === 0 && currentQuestion < totalQuestions) {
+    clearInterval(timerInterval);
+    nextSet();
+  } else if (currentQuestion < totalQuestions) {
+    showQuestion();
+  } else {
+    downloadCSV();
+  }
+}
 
-      // If still within total sets, move to next set
-      if (currentSet * setLength < totalQuestions) {
-        currentQuestion = currentSet * setLength;
-        startTimer(); // Restart timer for the next set
-        showQuestion();
-      } else {
-        downloadCSV(); // If all sets are completed
-      }
-    }
+function nextSet() {
+  currentSet++;
+  currentQuestion = currentSet * setLength;
+
+  if (currentSet * setLength < totalQuestions) {
+    startTimer();
+    showQuestion();
+  } else {
+    downloadCSV();
+  }
+}
 
     function downloadCSV() {
       formData.answers = answers;
-
-      // Create CSV content
       const csvContent = `Nama,${formData.name}\n` +
                          `Tahun Lahir,${formData.birthYear}\n` +
                          `Pendidikan Terakhir,${formData.education}\n` +
                          `Jawaban,\n` +
                          answers.map((answer, index) => `Soal ${index + 1},${answer}`).join("\n");
-
-      // Create a downloadable link
       const blob = new Blob([csvContent], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
       link.download = "hasil_kraepelin.csv";
       link.click();
-
       alert("Hasil Anda telah diunduh. Terima kasih!");
-      location.reload(); // Restart the test
+      location.reload();
     }
   </script>
 </head>
 <body>
   <div id="container">
-    <!-- Step 1: Collect personal information -->
     <div id="intro">
       <h2>Masukkan Data Diri Anda</h2>
-      <label for="name">Nama Panjang:</label><br>
-      <input type="text" id="name" required><br><br>
-
-      <label for="birthYear">Tahun Lahir:</label><br>
-      <input type="number" id="birthYear" min="1900" max="2024" required><br><br>
-
-      <label for="education">Pendidikan Terakhir:</label><br>
-      <select id="education" required>
-        <option value="">--Pilih Pendidikan--</option>
+      <input id="name" type="text" placeholder="Nama">
+      <input id="birthYear" type="number" placeholder="Tahun Lahir">
+      <select id="education">
+        <option value="">Pendidikan Terakhir</option>
         <option value="SD">SD</option>
         <option value="SMP">SMP</option>
         <option value="SMA">SMA</option>
-        <option value="Diploma">Diploma</option>
-        <option value="Sarjana">Sarjana</option>
-        <option value="Magister">Magister</option>
-        <option value="Doktor">Doktor</option>
-      </select><br><br>
-
+        <option value="D3">D3</option>
+        <option value="S1">S1</option>
+        <option value="S2">S2</option>
+      </select>
       <button onclick="startTest()">Mulai Tes</button>
     </div>
 
-    <!-- Step 2: Test interface -->
-    <div id="test" style="display:none;">
+    <div id="test" style="display: none;">
       <h3 id="question"></h3>
-      <input type="text" id="answer" onkeypress="if(event.key === 'Enter') nextQuestion()" />
-      <p id="timer"></p>
+      <input id="answer" type="number" onkeydown="if (event.key === 'Enter') nextQuestion()">
+      <button onclick="nextQuestion()">Selanjutnya</button>
+      <div id="timer"></div>
     </div>
   </div>
 </body>
